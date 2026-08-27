@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRUE NOVA FINANCE — Admin & Partner Portal</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                primary: "#003178",
+                "surface-variant": "#e2e2e2",
+                background: "#f8fafc",
+                "on-background": "#1e293b",
+                "on-surface": "#1e293b",
+                "on-surface-variant": "#64748b",
+                secondary: "#16a34a",
+                tertiary: "#dc2626"
+              }
+            }
+          }
+        }
+    </script>
+    <style>
+        :root {
+            --primary-color: #0f172a;
+            --bg-light: #f8fafc;
+        }
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: #334155;
+        }
+        .sidebar {
+            background-color: var(--primary-color);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        }
+        .sidebar .nav-link {
+            font-weight: 500;
+            color: #94a3b8;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            padding: 10px 14px;
+            transition: all 0.2s ease;
+        }
+        .sidebar .nav-link.active, .sidebar .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .card {
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+        input, select, textarea, .btn {
+            border-radius: 10px !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUTHENTICATION / LOGIN VIEW -->
+    <div id="loginSection" class="container d-flex align-items-center justify-content-center min-vh-100 py-4">
+        <div class="container" style="max-width: 420px;">
+            <div class="card shadow-lg p-4 p-md-5 bg-white">
+                <div class="text-center mb-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 56px; height: 56px;">
+                        <i class="bi bi-wallet2 fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-1">TRUE NOVA FINANCE</h3>
+                    <p class="text-muted small">Partner Financial Management Portal</p>
+                </div>
+                
+                <div id="alertBox" class="alert d-none py-2 small" role="alert"></div>
+
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
+                        <input type="email" class="form-control" id="email" required placeholder="name@company.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label small fw-semibold text-secondary">Password</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" required placeholder="••••••••">
+                            <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePassword">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-semibold shadow-sm mb-3">Sign In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="appSection" class="d-none">
+        
+        <!-- ADMIN INTERFACE -->
+        <div id="adminInterface" class="d-none">
+            <nav class="navbar navbar-dark bg-dark d-md-none sticky-top px-3 shadow-sm">
+                <span class="navbar-brand fw-bold fs-6">TRUE NOVA FINANCE</span>
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebarOffcanvas">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </nav>
+
+            <div class="offcanvas offcanvas-start bg-dark text-white d-md-none" tabindex="-1" id="mobileSidebarOffcanvas">
+                <div class="offcanvas-header border-bottom border-secondary">
+                    <h5 class="offcanvas-title fw-bold">TRUE NOVA</h5>
+                    <button type="button" class="btn-close btn-close-white text-reset shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body d-flex flex-column justify-content-between p-3">
+                    <ul class="nav nav-pills flex-column mb-auto" id="mobileSidebarNavLinks"></ul>
+                    <hr class="border-secondary my-3">
+                    <button class="btn btn-outline-light w-100 btn-sm py-2 logoutBtn"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                </div>
+            </div>
+
+            <div class="container-fluid">
+                <div class="row">
+                    <nav id="sidebar" class="col-md-3 col-lg-2 d-none d-md-block sidebar text-white min-vh-100 p-3 position-fixed">
+                        <div class="d-flex align-items-center pb-3 mb-3 border-bottom border-secondary">
+                            <span class="fs-5 fw-bold">TRUE NOVA</span>
+                        </div>
+                        <ul class="nav nav-pills flex-column mb-auto" id="desktopSidebarNavLinks"></ul>
+                        <hr class="border-secondary my-3">
+                        <button class="btn btn-outline-light w-100 btn-sm py-2 logoutBtn"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                    </nav>
+
+                    <main class="col-md-9 ms-sm-auto col-lg-10 px-3 px-md-4 py-4 mb-5 pb-5 offset-md-3 offset-lg-2">
+                        <div id="adminDashboardView" class="app-view">
+                            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                                <div>
+                                    <h4 class="fw-bold mb-1 text-slate-800">Admin Dashboard</h4>
+                                    <p class="text-muted small mb-0">Good Morning, Admin 👋</p>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addRevenueModal"><i class="bi bi-plus-lg me-1"></i> Revenue</button>
+                                    <button class="btn btn-dark btn-sm px-3 shadow-sm fw-semibold" onclick="openAddExpenseModal()"><i class="bi bi-plus-lg me-1"></i> Expense</button>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-6 col-md-3">
+                                    <div class="card p-3 bg-white border-start border-4 border-success h-100">
+                                        <span class="text-muted small fw-medium">Total Revenue</span>
+                                        <h5 class="fw-bold text-success mt-1 mb-0" id="dashTotalRevenue">₹0</h5>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="card p-3 bg-white border-start border-4 border-danger h-100">
+                                        <span class="text-muted small fw-medium">Total Expenses</span>
+                                        <h5 class="fw-bold text-danger mt-1 mb-0" id="dashTotalExpenses">₹0</h5>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="card p-3 bg-white border-start border-4 border-primary h-100">
+                                        <span class="text-muted small fw-medium">Net Profit</span>
+                                        <h5 class="fw-bold text-primary mt-1 mb-0" id="dashNetProfitLoss">₹0</h5>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="card p-3 bg-white border-start border-4 border-indigo-600 h-100">
+                                        <span class="text-muted small fw-medium">Each Partner Share</span>
+                                        <h5 class="fw-bold text-indigo-700 mt-1 mb-0" id="dashPartnerShare">₹0</h5>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card p-4 bg-white mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold fs-6 mb-0">Project Performance (Avani Nagar 1)</h5>
+                                    <button class="btn btn-sm btn-outline-primary fw-semibold" onclick="switchAdminTab('adminProjectsView')">View Projects</button>
+                                </div>
+                                <div id="adminProjectSummaryCard" class="p-3 bg-slate-50 text-slate-700 rounded-3 small">Loading projects...</div>
+                            </div>
+
+                            <div class="card p-4 bg-white">
+                                <h5 class="fw-bold fs-6 mb-3">Recent Expenses</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle mb-0">
+                                        <thead class="table-light"><tr><th>Date</th><th>Expense</th><th>Amount</th><th>Paid By</th></tr></thead>
+                                        <tbody id="dashRecentExpensesBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="adminRevenueView" class="app-view d-none">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="fw-bold mb-0">Revenue Management</h4>
+                                <button class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addRevenueModal">+ Add Revenue</button>
+                            </div>
+                            <div class="card p-4 bg-white">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light"><tr><th>Date</th><th>Title / Source</th><th>Project</th><th>Amount</th><th>Mode</th></tr></thead>
+                                        <tbody id="revenueTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="adminExpensesView" class="app-view d-none">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="fw-bold mb-0">Expense Management</h4>
+                                <button class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold" onclick="openAddExpenseModal()">+ Add Expense</button>
+                            </div>
+                            <div class="card p-4 bg-white">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light"><tr><th>Date</th><th>Title</th><th>Category</th><th>Amount</th><th>Paid By</th><th>Actions</th></tr></thead>
+                                        <tbody id="expenseTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="adminProjectsView" class="app-view d-none">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h4 class="fw-bold mb-1">Projects Management</h4>
+                                    <p class="text-muted small mb-0">Track real estate layouts like Avani Nagar 1</p>
+                                </div>
+                                <button class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addProjectModal">+ Add Project</button>
+                            </div>
+                            <div class="row g-3" id="projectsContainer"></div>
+                        </div>
+
+                        <div id="adminMoreView" class="app-view d-none">
+                            <h4 class="fw-bold mb-4">Administration & Control Panel</h4>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="card p-4 bg-white shadow-sm cursor-pointer hover:bg-slate-50" onclick="switchAdminTab('adminUsersView')">
+                                        <h5 class="fw-bold fs-6 text-primary"><i class="bi bi-people me-2"></i> Partner Accounts</h5>
+                                        <p class="text-muted small mb-0">Manage 3 equal partners & logins.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card p-4 bg-white shadow-sm">
+                                        <h5 class="fw-bold fs-6 text-success"><i class="bi bi-calculator me-2"></i> Month-End Settlement</h5>
+                                        <p class="text-muted small mb-0">Equal 1/3 split & transfer balance calculator.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card p-4 bg-white shadow-sm cursor-pointer hover:bg-slate-50" onclick="openReportPreview()">
+                                        <h5 class="fw-bold fs-6 text-dark"><i class="bi bi-file-earmark-pdf me-2"></i> Monthly Reports</h5>
+                                        <p class="text-muted small mb-0">Preview and download professional PDF statements.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="adminUsersView" class="app-view d-none">
+                            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                                <div>
+                                    <h4 class="fw-bold mb-1">Partner User Management</h4>
+                                    <p class="text-muted small mb-0">Create and manage logins for the 3 company partners.</p>
+                                </div>
+                                <button class="btn btn-primary btn-sm px-3 shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#createPartnerModal"><i class="bi bi-person-plus me-1"></i> Create Partner Account</button>
+                            </div>
+                            <div class="card p-4 bg-white">
+                                <h5 class="fw-bold fs-6 mb-3">Registered Partners (33.33% Each)</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light"><tr><th>Name</th><th>Email</th><th>Role</th><th>Share</th></tr></thead>
+                                        <tbody id="adminUsersTableBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        </div>
+
+        <!-- PARTNER INTERFACE -->
+        <div id="partnerInterface" class="d-none bg-background text-on-background pb-[80px] pt-[60px] min-vh-100">
+            <header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 h-14 bg-white shadow-sm">
+                <div class="flex items-center gap-3">
+                    <h1 class="font-bold text-lg text-blue-900 tracking-wide">TRUE NOVA FINANCE</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-circle overflow-hidden border border-primary shadow-sm cursor-pointer bg-slate-100 d-flex align-items-center justify-content-center" id="headerProfileClick" title="Open Profile">
+                        <img id="headerProfileImg" src="" alt="Profile" class="w-100 h-100 object-cover d-none">
+                        <span id="headerProfileInitial" class="fw-bold text-primary small">P</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="px-4 space-y-6 py-6 max-w-md mx-auto">
+                <!-- 1. HOME VIEW -->
+                <div id="partnerHomeView" class="partner-view space-y-6">
+                    <section class="space-y-1">
+                        <h2 class="text-xl font-bold text-on-surface" id="partnerWelcomeTitle">Hello Partner</h2>
+                        <p class="text-sm text-on-surface-variant">August 2026 Financial Summary</p>
+                    </section>
+
+                    <section class="grid grid-cols-2 gap-3">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 mb-1 uppercase">Company Revenue</p>
+                            <h4 class="text-xl font-extrabold text-success" id="pCardRevenue">₹0</h4>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 mb-1 uppercase">Total Expense</p>
+                            <h4 class="text-xl font-extrabold text-danger" id="pCardExpense">₹0</h4>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 mb-1 uppercase">Net Profit</p>
+                            <h4 class="text-xl font-extrabold text-blue-900" id="pCardProfit">₹0</h4>
+                        </div>
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 mb-1 uppercase">My Share (1/3)</p>
+                            <h4 class="text-xl font-extrabold text-indigo-700" id="pCardMyShare">₹0</h4>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 space-y-3">
+                        <h3 class="text-base font-bold text-slate-900 border-bottom pb-2">Your Financial Position</h3>
+                        <div class="flex justify-between text-sm"><span class="text-slate-600">My Profit Share</span><span class="fw-bold text-success" id="posProfitShare">₹0</span></div>
+                        <div class="flex justify-between text-sm"><span class="text-slate-600">I Paid for Company</span><span class="fw-bold text-primary" id="posIPaid">₹0</span></div>
+                        <div class="flex justify-between text-sm"><span class="text-slate-600">My Expense Share (1/3)</span><span class="fw-bold" id="posExpShare">₹0</span></div>
+                        <hr class="my-1">
+                        <div class="flex justify-between text-base fw-bold"><span class="text-slate-900">Settlement Position</span><span id="posSettlement" class="text-primary">Receive ₹0</span></div>
+                    </section>
+
+                    <div class="fixed bottom-20 right-4 z-40">
+                        <button class="flex items-center justify-center gap-2 bg-blue-900 text-white h-14 px-6 rounded-full shadow-lg hover:opacity-90 active:scale-95 transition-all" onclick="openAddExpenseModal()">
+                            <span class="material-symbols-outlined">add</span>
+                            <span class="text-xs font-bold uppercase tracking-wider">Add Expense</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. FINANCE VIEW -->
+                <div id="partnerFinanceView" class="partner-view space-y-4 d-none">
+                    <h3 class="text-lg font-bold">Revenue & Profit Overview</h3>
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                        <div class="flex justify-between"><span>Revenue:</span><span class="fw-bold text-success" id="finRev">₹0</span></div>
+                        <div class="flex justify-between"><span>Expenses:</span><span class="fw-bold text-danger" id="finExp">₹0</span></div>
+                        <div class="flex justify-between"><span>Net Profit:</span><span class="fw-bold text-primary" id="finNet">₹0</span></div>
+                        <hr>
+                        <div class="flex justify-between"><span>My 1/3 Share:</span><span class="fw-bold text-indigo-700" id="finShare">₹0</span></div>
+                    </div>
+                </div>
+
+                <!-- 3. EXPENSES VIEW -->
+                <div id="partnerExpensesView" class="partner-view space-y-4 d-none">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">Company Expenses</h3>
+                        <button class="btn btn-sm btn-primary" onclick="openAddExpenseModal()">+ Add</button>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-3">
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead class="table-light"><tr><th>Date</th><th>Expense</th><th>Amount</th><th>Paid By</th><th>Action</th></tr></thead>
+                                <tbody id="partnerExpenseTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. SETTLEMENT & STATEMENT DOWNLOAD VIEW -->
+                <div id="partnerSettlementView" class="partner-view space-y-4 d-none">
+                    <h3 class="text-lg font-bold">Month-End Settlement & Statements</h3>
+                    
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                        <div class="p-3 rounded bg-blue-50 text-blue-900 text-center fw-bold" id="settlementBanner">Calculating Settlement...</div>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                        <h4 class="text-sm font-bold text-slate-800">📄 Download My Personal Statement</h4>
+                        <div class="row g-2">
+                            <div class="col-6"><label class="form-label text-xs">Start Date</label><input type="date" id="myStartDate" class="form-control form-control-sm"></div>
+                            <div class="col-6"><label class="form-label text-xs">End Date</label><input type="date" id="myEndDate" class="form-control form-control-sm"></div>
+                        </div>
+                        <button class="btn btn-outline-primary w-100 btn-sm fw-semibold" onclick="downloadPartnerPersonalStatement()"><i class="bi bi-download me-1"></i> Download My Statement PDF</button>
+                    </div>
+
+                    <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                        <h4 class="text-sm font-bold text-slate-800">📊 Download Company P&L Statement</h4>
+                        <div class="row g-2">
+                            <div class="col-6"><label class="form-label text-xs">Start Date</label><input type="date" id="compStartDate" class="form-control form-control-sm"></div>
+                            <div class="col-6"><label class="form-label text-xs">End Date</label><input type="date" id="compEndDate" class="form-control form-control-sm"></div>
+                        </div>
+                        <button class="btn btn-primary w-100 btn-sm fw-semibold" onclick="downloadCompanyPLStatement()"><i class="bi bi-file-earmark-pdf me-1"></i> Download Company P&L PDF</button>
+                    </div>
+                </div>
+
+                <!-- 5. PROFILE VIEW -->
+                <div id="partnerProfileView" class="partner-view space-y-4 d-none">
+                    <h3 class="text-lg font-bold">Partner Profile</h3>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200 space-y-3">
+                        <div class="text-center mb-3">
+                            <div class="w-20 h-20 rounded-circle overflow-hidden border border-primary shadow mx-auto bg-slate-100 d-flex align-items-center justify-content-center">
+                                <img id="profileAvatarImg" src="" alt="Avatar" class="w-100 h-100 object-cover d-none">
+                                <span id="profileAvatarInitial" class="fw-bold text-primary fs-3">P</span>
+                            </div>
+                        </div>
+
+                        <form id="profileUpdateForm">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Name</label>
+                                <input type="text" id="profileNameInput" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Email Address</label>
+                                <input type="email" id="profileEmailInput" class="form-control" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Mobile Number</label>
+                                <input type="text" id="profilePhoneInput" class="form-control" placeholder="+91 9876543210">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Profile Photo URL</label>
+                                <input type="url" id="profilePhotoInput" class="form-control" placeholder="https://example.com/photo.jpg">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Profit Ratio</label>
+                                <input type="text" class="form-control bg-light" value="33.33% (Equal Share)" readonly>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-sm fw-semibold py-2 mb-2">Update Profile</button>
+                        </form>
+                        <button class="btn btn-outline-danger w-100 btn-sm logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Bottom NavBar for Partner -->
+            <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 h-16 bg-white border-t border-slate-200 shadow-lg">
+                <button class="partner-nav-btn flex flex-col items-center justify-center text-blue-900 bg-blue-50 rounded-full px-3 py-1" data-target="partnerHomeView">
+                    <span class="material-symbols-outlined mb-0 text-xl" style="font-variation-settings: 'FILL' 1;">home</span>
+                    <span class="text-[10px] font-bold">Home</span>
+                </button>
+                <button class="partner-nav-btn flex flex-col items-center justify-center text-slate-500 hover:text-blue-900 py-1 px-2" data-target="partnerFinanceView">
+                    <span class="material-symbols-outlined mb-0 text-xl">payments</span>
+                    <span class="text-[10px] font-bold">Finance</span>
+                </button>
+                <button class="partner-nav-btn flex flex-col items-center justify-center text-slate-500 hover:text-blue-900 py-1 px-2" data-target="partnerExpensesView">
+                    <span class="material-symbols-outlined mb-0 text-xl">receipt_long</span>
+                    <span class="text-[10px] font-bold">Expenses</span>
+                </button>
+                <button class="partner-nav-btn flex flex-col items-center justify-center text-slate-500 hover:text-blue-900 py-1 px-2" data-target="partnerSettlementView">
+                    <span class="material-symbols-outlined mb-0 text-xl">balance</span>
+                    <span class="text-[10px] font-bold">Settlement</span>
+                </button>
+                <button class="partner-nav-btn flex flex-col items-center justify-center text-slate-500 hover:text-blue-900 py-1 px-2" data-target="partnerProfileView">
+                    <span class="material-symbols-outlined mb-0 text-xl">person</span>
+                    <span class="text-[10px] font-bold">Profile</span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal fade" id="addRevenueModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold fs-6">Add Revenue Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="revenueForm">
+                        <div class="mb-3"><label class="form-label small fw-semibold">Date</label><input type="date" id="revDate" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Title</label><input type="text" id="revTitle" class="form-control" required placeholder="Plot Booking"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Customer / Source</label><input type="text" id="revSource" class="form-control" required placeholder="Customer Name"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Project</label><input type="text" id="revProject" class="form-control" placeholder="Avani Nagar 1"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Amount (₹)</label><input type="number" id="revAmount" class="form-control" step="0.01" required></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Payment Mode</label>
+                            <select id="revMode" class="form-select">
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Cash">Cash</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2.5 fw-semibold mt-2">Save Revenue</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addExpenseModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold fs-6" id="expenseModalTitle">Add Expense Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="expenseForm">
+                        <input type="hidden" id="expenseId">
+                        <div class="mb-3"><label class="form-label small fw-semibold">Date</label><input type="date" id="expDate" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Title</label><input type="text" id="expTitle" class="form-control" required placeholder="Facebook Ads"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Category</label>
+                            <select id="expCategory" class="form-select">
+                                <option value="Marketing">Marketing</option>
+                                <option value="Office Rent">Office Rent</option>
+                                <option value="Petrol">Petrol</option>
+                                <option value="Salary">Salary</option>
+                                <option value="Miscellaneous">Miscellaneous</option>
+                            </select>
+                        </div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Project</label><input type="text" id="expProject" class="form-control" placeholder="Avani Nagar 1"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Amount (₹)</label><input type="number" id="expAmount" class="form-control" step="0.01" required></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Paid By</label><input type="text" id="expPaidBy" class="form-control" required></div>
+                        <button type="submit" class="btn btn-primary w-100 py-2.5 fw-semibold mt-2" id="expenseSubmitBtn">Save Expense</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addProjectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold fs-6">Add New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="projectForm">
+                        <div class="mb-3"><label class="form-label small fw-semibold">Project Name</label><input type="text" id="projName" class="form-control" required placeholder="Avani Nagar 1"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Location / Details</label><input type="text" id="projDetails" class="form-control" required placeholder="Nagpur"></div>
+                        <button type="submit" class="btn btn-primary w-100 py-2.5 fw-semibold mt-2">Save Project</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createPartnerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold fs-6">Create Partner Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="createPartnerForm">
+                        <div class="mb-3"><label class="form-label small fw-semibold">Partner Name</label><input type="text" id="newPartnerName" class="form-control" required placeholder="Partner 1"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Email Address</label><input type="email" id="newPartnerEmail" class="form-control" required placeholder="partner@company.com"></div>
+                        <div class="mb-3"><label class="form-label small fw-semibold">Password</label><input type="password" id="newPartnerPassword" class="form-control" required placeholder="Min 6 characters"></div>
+                        <button type="submit" class="btn btn-primary w-100 py-2.5 fw-semibold mt-2">Create Partner Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="reportPreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold fs-5">Monthly Financial Report Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="reportPreviewContent" class="p-4 bg-slate-50 border rounded-3 mb-4 text-sm space-y-3"></div>
+                    <button type="button" class="btn btn-success w-100 py-2.5 fw-semibold shadow-sm" onclick="downloadPDFReport()"><i class="bi bi-download me-2"></i> Download Official PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- FIREBASE & APP LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDwSNxVCuPr3OKB_MSUEx_u5sOJX3CPugo",
+            authDomain: "true-nova-finance.firebaseapp.com",
+            projectId: "true-nova-finance",
+            storageBucket: "true-nova-finance.firebasestorage.app",
+            messagingSenderId: "727988165498",
+            appId: "1:727988165498:web:cec6302f03ee9c5f8214c3",
+            measurementId: "G-1NPLQWYSZL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserUid = null;
+        let currentUserData = null;
+        let allExpensesCache = [];
+        let allRevenuesCache = [];
+        let latestReportData = { totalRev: 0, totalExp: 0, netPL: 0, share: 0 };
+
+        const loginSection = document.getElementById("loginSection");
+        const appSection = document.getElementById("appSection");
+        const adminInterface = document.getElementById("adminInterface");
+        const partnerInterface = document.getElementById("partnerInterface");
+        const alertBox = document.getElementById("alertBox");
+        const loginForm = document.getElementById("loginForm");
+
+        document.getElementById("togglePassword").addEventListener("click", () => {
+            const pwdInput = document.getElementById("password");
+            pwdInput.setAttribute("type", pwdInput.getAttribute("type") === "password" ? "text" : "password");
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                loginSection.classList.add("d-none");
+                appSection.classList.remove("d-none");
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    currentUserData = userDoc.exists() ? userDoc.data() : { role: "admin", name: "Admin", email: user.email };
+                    setupUIByRole(currentUserData);
+                } catch (e) {
+                    currentUserData = { role: "admin", name: "Admin", email: user.email };
+                    setupUIByRole(currentUserData);
+                }
+            } else {
+                currentUserUid = null;
+                appSection.classList.add("d-none");
+                loginSection.classList.remove("d-none");
+            }
+        });
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alertBox.className = "alert alert-danger py-2 small";
+                alertBox.textContent = "Invalid email or password.";
+                alertBox.classList.remove("d-none");
+            }
+        });
+
+        const handleLogout = async () => { await signOut(auth); };
+        document.querySelectorAll(".logoutBtn").forEach(btn => btn.addEventListener("click", handleLogout));
+
+        function setupUIByRole(userData) {
+            if (userData.role === "admin") {
+                adminInterface.classList.remove("d-none");
+                partnerInterface.classList.add("d-none");
+
+                const desktopNav = document.getElementById("desktopSidebarNavLinks");
+                const mobileNav = document.getElementById("mobileSidebarNavLinks");
+                const navContent = `
+                    <li class="nav-item"><a href="#" class="nav-link active" data-target="adminDashboardView"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link" data-target="adminRevenueView"><i class="bi bi-cash-stack me-2"></i> Revenue</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link" data-target="adminExpensesView"><i class="bi bi-receipt me-2"></i> Expenses</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link" data-target="adminProjectsView"><i class="bi bi-building me-2"></i> Projects</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link" data-target="adminMoreView"><i class="bi bi-three-dots me-2"></i> More</a></li>
+                `;
+                desktopNav.innerHTML = navContent;
+                mobileNav.innerHTML = navContent;
+
+                loadAdminData();
+                loadProjectsData();
+                loadUsersData();
+
+                window.switchAdminTab = function(target) {
+                    document.querySelectorAll(".sidebar .nav-link, .offcanvas .nav-link").forEach(l => l.classList.remove("active"));
+                    const activeLink = document.querySelector(`[data-target="${target}"]`);
+                    if (activeLink) activeLink.classList.add("active");
+                    
+                    document.querySelectorAll(".app-view").forEach(v => v.classList.add("d-none"));
+                    document.getElementById(target).classList.remove("d-none");
+
+                    const mobileOffcanvasEl = document.getElementById("mobileSidebarOffcanvas");
+                    const bsOffcanvas = bootstrap.Offcanvas.getInstance(mobileOffcanvasEl);
+                    if (bsOffcanvas) bsOffcanvas.hide();
+                };
+
+                document.querySelectorAll(".sidebar .nav-link, .offcanvas .nav-link").forEach(link => {
+                    link.addEventListener("click", (e) => {
+                        e.preventDefault();
+                        switchAdminTab(link.getAttribute("data-target"));
+                    });
+                });
+            } else {
+                adminInterface.classList.add("d-none");
+                partnerInterface.classList.remove("d-none");
+                document.getElementById("partnerWelcomeTitle").textContent = `Hello ${userData.name} 👋`;
+                
+                document.getElementById("profileNameInput").value = userData.name || "";
+                document.getElementById("profileEmailInput").value = userData.email || "";
+                document.getElementById("profilePhoneInput").value = userData.phone || "";
+                document.getElementById("profilePhotoInput").value = userData.photoUrl || "";
+
+                updateHeaderAvatar(userData);
+                loadPartnerData();
+
+                document.getElementById("headerProfileClick").addEventListener("click", () => {
+                    document.querySelectorAll(".partner-view").forEach(v => v.classList.add("d-none"));
+                    document.getElementById("partnerProfileView").classList.remove("d-none");
+
+                    document.querySelectorAll(".partner-nav-btn").forEach(b => {
+                        b.classList.remove("text-blue-900", "bg-blue-50");
+                        b.classList.add("text-slate-500");
+                    });
+                    const profileNavBtn = document.querySelector('[data-target="partnerProfileView"]');
+                    if (profileNavBtn) {
+                        profileNavBtn.classList.add("text-blue-900", "bg-blue-50");
+                        profileNavBtn.classList.remove("text-slate-500");
+                    }
+                });
+
+                document.querySelectorAll(".partner-nav-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const targetView = btn.getAttribute("data-target");
+                        document.querySelectorAll(".partner-view").forEach(v => v.classList.add("d-none"));
+                        document.getElementById(targetView).classList.remove("d-none");
+
+                        document.querySelectorAll(".partner-nav-btn").forEach(b => {
+                            b.classList.remove("text-blue-900", "bg-blue-50");
+                            b.classList.add("text-slate-500");
+                        });
+                        btn.classList.add("text-blue-900", "bg-blue-50");
+                        btn.classList.remove("text-slate-500");
+                    });
+                });
+            }
+        }
+
+        function updateHeaderAvatar(userData) {
+            const imgEl = document.getElementById("headerProfileImg");
+            const initialEl = document.getElementById("headerProfileInitial");
+            const profileAvatarImg = document.getElementById("profileAvatarImg");
+            const profileAvatarInitial = document.getElementById("profileAvatarInitial");
+
+            const nameInitial = userData.name ? userData.name.charAt(0).toUpperCase() : "P";
+
+            if (userData.photoUrl && userData.photoUrl.trim() !== "") {
+                imgEl.src = userData.photoUrl;
+                imgEl.classList.remove("d-none");
+                initialEl.classList.add("d-none");
+
+                profileAvatarImg.src = userData.photoUrl;
+                profileAvatarImg.classList.remove("d-none");
+                profileAvatarInitial.classList.add("d-none");
+            } else {
+                imgEl.classList.add("d-none");
+                initialEl.textContent = nameInitial;
+                initialEl.classList.remove("d-none");
+
+                profileAvatarImg.classList.add("d-none");
+                profileAvatarInitial.textContent = nameInitial;
+                profileAvatarInitial.classList.remove("d-none");
+            }
+        }
+
+        document.getElementById("profileUpdateForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!currentUserUid) return;
+
+            const newName = document.getElementById("profileNameInput").value;
+            const newPhone = document.getElementById("profilePhoneInput").value;
+            const newPhotoUrl = document.getElementById("profilePhotoInput").value;
+
+            try {
+                const userRef = doc(db, "users", currentUserUid);
+                await updateDoc(userRef, {
+                    name: newName,
+                    phone: newPhone,
+                    photoUrl: newPhotoUrl
+                });
+
+                currentUserData.name = newName;
+                currentUserData.phone = newPhone;
+                currentUserData.photoUrl = newPhotoUrl;
+
+                updateHeaderAvatar(currentUserData);
+                document.getElementById("partnerWelcomeTitle").textContent = `Hello ${newName} 👋`;
+                alert("Profile updated successfully!");
+            } catch (err) {
+                alert("Error updating profile: " + err.message);
+            }
+        });
+
+        window.openAddExpenseModal = function() {
+            document.getElementById("expenseModalTitle").textContent = "Add Expense Entry";
+            document.getElementById("expenseSubmitBtn").textContent = "Save Expense";
+            document.getElementById("expenseId").value = "";
+            document.getElementById("expenseForm").reset();
+            if(currentUserData) {
+                document.getElementById("expPaidBy").value = currentUserData.name;
+            }
+            new bootstrap.Modal(document.getElementById("addExpenseModal")).show();
+        };
+
+        window.editExpense = function(id) {
+            const exp = allExpensesCache.find(item => item.id === id);
+            if (!exp) return;
+
+            document.getElementById("expenseModalTitle").textContent = "Edit Expense Entry";
+            document.getElementById("expenseSubmitBtn").textContent = "Update Expense";
+            document.getElementById("expenseId").value = exp.id;
+            document.getElementById("expDate").value = exp.date || "";
+            document.getElementById("expTitle").value = exp.title || "";
+            document.getElementById("expCategory").value = exp.category || "Marketing";
+            document.getElementById("expProject").value = exp.project || "";
+            document.getElementById("expAmount").value = exp.amount || "";
+            document.getElementById("expPaidBy").value = exp.paidBy || currentUserData.name;
+
+            new bootstrap.Modal(document.getElementById("addExpenseModal")).show();
+        };
+
+        window.deleteExpense = async function(id) {
+            if (confirm("Are you sure you want to delete this expense?")) {
+                try {
+                    await deleteDoc(doc(db, "expenses", id));
+                    if (currentUserData.role === "admin") loadAdminData();
+                    else loadPartnerData();
+                } catch (err) {
+                    alert("Error deleting expense: " + err.message);
+                }
+            }
+        };
+
+        window.downloadPartnerPersonalStatement = function() {
+            const start = document.getElementById("myStartDate").value;
+            const end = document.getElementById("myEndDate").value;
+
+            const filteredExp = allExpensesCache.filter(e => {
+                if (e.paidBy !== currentUserData.name) return false;
+                if (start && e.date < start) return false;
+                if (end && e.date > end) return false;
+                return true;
+            });
+
+            const totalPaid = filteredExp.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+
+            docPdf.setFont("helvetica", "bold");
+            docPdf.setFontSize(16);
+            docPdf.text("TRUE NOVA FINANCE", 14, 20);
+            docPdf.setFontSize(11);
+            docPdf.setTextColor(100);
+            docPdf.text(`Personal Statement for ${currentUserData.name}`, 14, 27);
+            docPdf.text(`Period: ${start || 'Beginning'} to ${end || 'Present'}`, 14, 33);
+            docPdf.line(14, 38, 196, 38);
+
+            docPdf.setTextColor(0, 0, 0);
+            let y = 48;
+            docPdf.text(`Total Contributions Paid: Rs. ${totalPaid.toLocaleString()}`, 14, y);
+            y += 10;
+
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text("Expense History:", 14, y);
+            y += 8;
+
+            docPdf.setFont("helvetica", "normal");
+            filteredExp.forEach(e => {
+                if(y > 280) { docPdf.addPage(); y = 20; }
+                docPdf.text(`${e.date} | ${e.title} (${e.category}) : Rs. ${Number(e.amount).toLocaleString()}`, 18, y);
+                y += 7;
+            });
+
+            // Fallback Blob / Safe Open for APK & Web
+            const pdfBlob = docPdf.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            window.open(blobUrl, '_blank');
+        };
+
+        window.downloadCompanyPLStatement = function() {
+            const start = document.getElementById("compStartDate").value;
+            const end = document.getElementById("compEndDate").value;
+
+            const filteredRev = allRevenuesCache.filter(r => {
+                if (start && r.date < start) return false;
+                if (end && r.date > end) return false;
+                return true;
+            });
+
+            const filteredExp = allExpensesCache.filter(e => {
+                if (start && e.date < start) return false;
+                if (end && e.date > end) return false;
+                return true;
+            });
+
+            const revSum = filteredRev.reduce((sum, r) => sum + Number(r.amount || 0), 0);
+            const expSum = filteredExp.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+            const net = revSum - expSum;
+            const share = Math.round((net / 3) * 100) / 100;
+
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+
+            docPdf.setFont("helvetica", "bold");
+            docPdf.setFontSize(16);
+            docPdf.text("TRUE NOVA FINANCE", 14, 20);
+            docPdf.setFontSize(11);
+            docPdf.setTextColor(100);
+            docPdf.text(`Company Profit & Loss Statement`, 14, 27);
+            docPdf.text(`Period: ${start || 'Beginning'} to ${end || 'Present'}`, 14, 33);
+            docPdf.line(14, 38, 196, 38);
+
+            docPdf.setTextColor(0, 0, 0);
+            let y = 48;
+            docPdf.text(`Total Revenue: Rs. ${revSum.toLocaleString()}`, 14, y);
+            y += 10;
+            docPdf.text(`Total Expenses: Rs. ${expSum.toLocaleString()}`, 14, y);
+            y += 10;
+            docPdf.text(`Net Profit / Loss: Rs. ${net.toLocaleString()}`, 14, y);
+            y += 15;
+
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text("Equal Partner Distribution (33.33% each):", 14, y);
+            y += 10;
+
+            docPdf.setFont("helvetica", "normal");
+            docPdf.text(`Partner Share (1/3): Rs. ${share.toLocaleString()}`, 20, y);
+
+            const pdfBlob = docPdf.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            window.open(blobUrl, '_blank');
+        };
+
+        window.openReportPreview = function() {
+            const previewEl = document.getElementById("reportPreviewContent");
+            previewEl.innerHTML = `
+                <div class="text-center pb-2 border-bottom">
+                    <h4 class="fw-bold text-primary mb-1">TRUE NOVA FINANCE</h4>
+                    <p class="text-muted small mb-0">Monthly Financial Statement — August 2026</p>
+                </div>
+                <div class="row g-2 py-2">
+                    <div class="col-6"><strong>Total Revenue:</strong> ₹${latestReportData.totalRev.toLocaleString()}</div>
+                    <div class="col-6"><strong>Total Expenses:</strong> ₹${latestReportData.totalExp.toLocaleString()}</div>
+                    <div class="col-6"><strong>Net Profit:</strong> ₹${latestReportData.netPL.toLocaleString()}</div>
+                    <div class="col-6"><strong>Equal Partner Share (1/3):</strong> ₹${latestReportData.share.toLocaleString()}</div>
+                </div>
+                <div class="alert alert-info py-2 small mb-0">
+                    <i class="bi bi-info-circle me-1"></i> Profit and loss are divided strictly equally (33.33%) among all 3 partners.
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById("reportPreviewModal")).show();
+        };
+
+        window.downloadPDFReport = function() {
+            const { jsPDF } = window.jspdf;
+            const docPdf = new jsPDF();
+            docPdf.setFont("helvetica", "bold");
+            docPdf.setFontSize(18);
+            docPdf.text("TRUE NOVA FINANCE", 14, 20);
+            docPdf.setFontSize(12);
+            docPdf.setTextColor(100);
+            docPdf.text("Monthly Financial Report — August 2026", 14, 28);
+            docPdf.line(14, 34, 196, 34);
+            docPdf.setFont("helvetica", "normal");
+            docPdf.setFontSize(11);
+            docPdf.setTextColor(0, 0, 0);
+
+            let y = 45;
+            docPdf.text(`Total Revenue: Rs. ${latestReportData.totalRev.toLocaleString()}`, 14, y);
+            y += 10;
+            docPdf.text(`Total Expenses: Rs. ${latestReportData.totalExp.toLocaleString()}`, 14, y);
+            y += 10;
+            docPdf.text(`Net Profit / Loss: Rs. ${latestReportData.netPL.toLocaleString()}`, 14, y);
+            y += 15;
+            docPdf.setFont("helvetica", "bold");
+            docPdf.text("Partner Equal Distribution (33.33% each):", 14, y);
+            y += 10;
+            docPdf.setFont("helvetica", "normal");
+            docPdf.text(`Partner Share: Rs. ${latestReportData.share.toLocaleString()}`, 20, y);
+            
+            const pdfBlob = docPdf.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            window.open(blobUrl, '_blank');
+        };
+
+        async function loadAdminData() {
+            try {
+                const revSnap = await getDocs(collection(db, "revenues"));
+                const expSnap = await getDocs(collection(db, "expenses"));
+                
+                let totalRev = 0, totalExp = 0;
+                const revBody = document.getElementById("revenueTableBody");
+                const expBody = document.getElementById("expenseTableBody");
+                const dashExpBody = document.getElementById("dashRecentExpensesBody");
+                revBody.innerHTML = "";
+                expBody.innerHTML = "";
+                dashExpBody.innerHTML = "";
+                allExpensesCache = [];
+                allRevenuesCache = [];
+
+                revSnap.forEach(d => {
+                    const r = d.data();
+                    allRevenuesCache.push(r);
+                    totalRev += Number(r.amount || 0);
+                    revBody.innerHTML += `<tr><td>${r.date}</td><td>${r.title}</td><td>${r.project || '-'}</td><td>₹${Number(r.amount).toLocaleString()}</td><td><span class="badge bg-light text-dark border">${r.paymentMode}</span></td></tr>`;
+                });
+
+                expSnap.forEach(d => {
+                    const id = d.id;
+                    const e = d.data();
+                    allExpensesCache.push({ id, ...e });
+                    const amt = Number(e.amount || 0);
+                    totalExp += amt;
+
+                    expBody.innerHTML += `
+                        <tr>
+                            <td>${e.date}</td>
+                            <td>${e.title}</td>
+                            <td><span class="badge bg-light text-secondary border">${e.category}</span></td>
+                            <td>₹${amt.toLocaleString()}</td>
+                            <td>${e.paidBy}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary py-0 px-1 me-1" onclick="editExpense('${id}')"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteExpense('${id}')"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>`;
+
+                    if(dashExpBody.rows.length < 5) {
+                        dashExpBody.innerHTML += `<tr><td>${e.date}</td><td>${e.title}</td><td>₹${amt.toLocaleString()}</td><td>${e.paidBy}</td></tr>`;
+                    }
+                });
+
+                const netPL = totalRev - totalExp;
+                const partnerShare = Math.round((netPL / 3) * 100) / 100;
+                latestReportData = { totalRev, totalExp, netPL, share: partnerShare };
+
+                document.getElementById("dashTotalRevenue").textContent = `₹${totalRev.toLocaleString()}`;
+                document.getElementById("dashTotalExpenses").textContent = `₹${totalExp.toLocaleString()}`;
+                document.getElementById("dashNetProfitLoss").textContent = `₹${netPL.toLocaleString()}`;
+                document.getElementById("dashPartnerShare").textContent = `₹${partnerShare.toLocaleString()}`;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadProjectsData() {
+            try {
+                const projSnap = await getDocs(collection(db, "projects"));
+                const container = document.getElementById("projectsContainer");
+                const summaryCard = document.getElementById("adminProjectSummaryCard");
+                container.innerHTML = "";
+
+                if (projSnap.empty) {
+                    container.innerHTML = `<p class="text-muted small">No projects added yet.</p>`;
+                    summaryCard.innerHTML = `Avani Nagar 1 — Active Layout`;
+                    return;
+                }
+
+                projSnap.forEach(d => {
+                    const p = d.data();
+                    container.innerHTML += `
+                        <div class="col-md-6">
+                            <div class="card p-4 bg-white shadow-sm border-start border-4 border-primary">
+                                <h5 class="fw-bold">${p.name}</h5>
+                                <p class="text-muted small mb-2"><i class="bi bi-geo-alt me-1"></i>${p.details}</p>
+                                <div class="d-flex justify-content-between text-sm mt-2">
+                                    <span>Status: <strong class="text-success">Active</strong></span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                summaryCard.innerHTML = `Avani Nagar 1 Active Layout Tracking Live via Firestore Database.`;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadUsersData() {
+            try {
+                const usersSnap = await getDocs(collection(db, "users"));
+                const tbody = document.getElementById("adminUsersTableBody");
+                tbody.innerHTML = "";
+                usersSnap.forEach(d => {
+                    const u = d.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="fw-semibold">${u.name}</td>
+                            <td>${u.email}</td>
+                            <td><span class="badge ${u.role === 'admin' ? 'bg-primary' : 'bg-secondary'}">${u.role.toUpperCase()}</span></td>
+                            <td>${u.role === 'partner' ? '33.33%' : '-'}</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadPartnerData() {
+            try {
+                const revSnap = await getDocs(collection(db, "revenues"));
+                const expSnap = await getDocs(collection(db, "expenses"));
+                let totalRev = 0, totalExp = 0;
+                let partnerPaid = 0;
+
+                const expBody = document.getElementById("partnerExpenseTableBody");
+                expBody.innerHTML = "";
+                allExpensesCache = [];
+                allRevenuesCache = [];
+
+                revSnap.forEach(d => {
+                    const r = d.data();
+                    allRevenuesCache.push(r);
+                    totalRev += Number(r.amount || 0);
+                });
+                
+                expSnap.forEach(d => {
+                    const id = d.id;
+                    const e = d.data();
+                    allExpensesCache.push({ id, ...e });
+                    const amt = Number(e.amount || 0);
+                    totalExp += amt;
+                    if (currentUserData && e.paidBy === currentUserData.name) {
+                        partnerPaid += amt;
+                    }
+                    expBody.innerHTML += `
+                        <tr>
+                            <td>${e.date}</td>
+                            <td>${e.title}</td>
+                            <td>₹${amt.toLocaleString()}</td>
+                            <td>${e.paidBy}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary py-0 px-1 me-1" onclick="editExpense('${id}')"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-outline-danger py-0 px-1" onclick="deleteExpense('${id}')"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>`;
+                });
+
+                const netProfit = totalRev - totalExp;
+                const myProfitShare = Math.round((netProfit / 3) * 100) / 100;
+                const myEqualExpenseShare = Math.round((totalExp / 3) * 100) / 100;
+                const settlementDiff = partnerPaid - myEqualExpenseShare;
+
+                document.getElementById("pCardRevenue").textContent = `₹${totalRev.toLocaleString()}`;
+                document.getElementById("pCardExpense").textContent = `₹${totalExp.toLocaleString()}`;
+                document.getElementById("pCardProfit").textContent = `₹${netProfit.toLocaleString()}`;
+                document.getElementById("pCardMyShare").textContent = `₹${myProfitShare.toLocaleString()}`;
+
+                document.getElementById("posProfitShare").textContent = `₹${myProfitShare.toLocaleString()}`;
+                document.getElementById("posIPaid").textContent = `₹${partnerPaid.toLocaleString()}`;
+                document.getElementById("posExpShare").textContent = `₹${myEqualExpenseShare.toLocaleString()}`;
+
+                const posSettleEl = document.getElementById("posSettlement");
+                const bannerEl = document.getElementById("settlementBanner");
+                if (settlementDiff >= 0) {
+                    posSettleEl.textContent = `Receive ₹${Math.abs(settlementDiff).toLocaleString()}`;
+                    bannerEl.textContent = `🟢 You will receive ₹${Math.abs(settlementDiff).toLocaleString()}`;
+                    bannerEl.className = "p-3 rounded bg-green-50 text-green-800 text-center fw-bold";
+                } else {
+                    posSettleEl.textContent = `Pay ₹${Math.abs(settlementDiff).toLocaleString()}`;
+                    bannerEl.textContent = `🔴 You need to pay ₹${Math.abs(settlementDiff).toLocaleString()}`;
+                    bannerEl.className = "p-3 rounded bg-red-50 text-red-800 text-center fw-bold";
+                }
+
+                document.getElementById("finRev").textContent = `₹${totalRev.toLocaleString()}`;
+                document.getElementById("finExp").textContent = `₹${totalExp.toLocaleString()}`;
+                document.getElementById("finNet").textContent = `₹${netProfit.toLocaleString()}`;
+                document.getElementById("finShare").textContent = `₹${myProfitShare.toLocaleString()}`;
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.getElementById("createPartnerForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const name = document.getElementById("newPartnerName").value;
+            const email = document.getElementById("newPartnerEmail").value;
+            const password = document.getElementById("newPartnerPassword").value;
+
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                await setDoc(doc(db, "users", cred.user.uid), {
+                    name: name,
+                    email: email,
+                    role: "partner",
+                    sharePercentage: 33.33,
+                    createdAt: new Date().toISOString()
+                });
+
+                bootstrap.Modal.getInstance(document.getElementById("createPartnerModal")).hide();
+                document.getElementById("createPartnerForm").reset();
+                loadUsersData();
+            } catch (err) {
+                alert("Error creating partner: " + err.message);
+            }
+        });
+
+        document.getElementById("projectForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "projects"), {
+                name: document.getElementById("projName").value,
+                details: document.getElementById("projDetails").value,
+                createdAt: new Date().toISOString()
+            });
+            bootstrap.Modal.getInstance(document.getElementById("addProjectModal")).hide();
+            document.getElementById("projectForm").reset();
+            loadProjectsData();
+        });
+
+        document.getElementById("revenueForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "revenues"), {
+                date: document.getElementById("revDate").value,
+                title: document.getElementById("revTitle").value,
+                source: document.getElementById("revSource").value,
+                project: document.getElementById("revProject").value,
+                amount: parseFloat(document.getElementById("revAmount").value),
+                paymentMode: document.getElementById("revMode").value,
+                createdAt: new Date().toISOString()
+            });
+            bootstrap.Modal.getInstance(document.getElementById("addRevenueModal")).hide();
+            document.getElementById("revenueForm").reset();
+            loadAdminData();
+        });
+
+        document.getElementById("expenseForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const expenseId = document.getElementById("expenseId").value;
+            const expenseData = {
+                date: document.getElementById("expDate").value,
+                title: document.getElementById("expTitle").value,
+                category: document.getElementById("expCategory").value,
+                project: document.getElementById("expProject").value,
+                amount: parseFloat(document.getElementById("expAmount").value),
+                paidBy: document.getElementById("expPaidBy").value,
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                if (expenseId) {
+                    await updateDoc(doc(db, "expenses", expenseId), expenseData);
+                } else {
+                    expenseData.createdAt = new Date().toISOString();
+                    await addDoc(collection(db, "expenses"), expenseData);
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById("addExpenseModal")).hide();
+                document.getElementById("expenseForm").reset();
+
+                if (currentUserData.role === "admin") loadAdminData();
+                else loadPartnerData();
+            } catch (err) {
+                alert("Error saving expense: " + err.message);
+            }
+        });
+    </script>
+</body>
+</html>
